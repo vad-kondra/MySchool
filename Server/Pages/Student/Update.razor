@@ -1,0 +1,54 @@
+﻿@page "/students/edit/{studentId:long}"
+
+@inherits UpdateStudentBase
+
+<h3>Редактирование</h3>
+
+<EditForm Model="Student" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+     <div class="form-group row">
+        <label class="control-label col-md-12">Фамилия</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="Student.LastName" />
+        </div>
+        <ValidationMessage For="@(() => Student.LastName)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Имя</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="Student.FirstName" />
+        </div>
+        <ValidationMessage For="@(() => Student.FirstName)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Отчество</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="Student.MiddleName" />
+        </div>
+        <ValidationMessage For="@(() => Student.MiddleName)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Класс</label>
+        <div class="col-md-4">
+            <InputSelect id="grade" @bind-Value="Student.GradeId" class="form-control">
+                <option value="">Не выбран</option>
+                @foreach (var grade in Grades)
+                {
+                    <option value="@grade.GradeId">@grade.Number-@grade.Parallel</option>
+                }
+            </InputSelect>
+        </div>
+        <ValidationMessage For="@(() => Student.MiddleName)" />
+    </div>
+    
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-light" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
+
+@code {
+
+}

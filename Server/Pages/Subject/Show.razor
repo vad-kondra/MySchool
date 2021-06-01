@@ -1,0 +1,61 @@
+﻿@page "/subjects/{subjectId:long}"
+@using BusinessLogicLayer.StudentService.Dtos
+@using BusinessLogicLayer.StudentService
+@using BusinessLogicLayer.GradeService
+
+@inject NavigationManager UrlNavigationManager
+@inject IStudentService StudentService
+@inject IGradeService GradeService
+@inject IJSRuntime Js
+
+<h3>Show</h3>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-2">ФИО</div>
+        <div class="col-md-2">@StudentService.GetFullFIO(Student)</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">Класс</div>
+        <div class="col-md-2">@GradeService.GetGradeTitle(Student.Grade)</div>
+    </div>
+    <div class="row">
+        <button type="button" class="btn btn-success" @onclick="@(() => Edit(Student.StudentId))">Редактировать</button>
+        <button type="button" class="btn btn-danger" @onclick="@(() => Delete(Student.StudentId))">Удалить</button>
+    </div>
+</div>
+
+
+@code {
+    
+    [Parameter]
+    public long? StudentId { get; set; }
+        
+    protected StudentDto Student { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (StudentId != null)
+        {
+            Student = StudentService.GetById(StudentId.Value);
+        }
+        else
+        {
+            UrlNavigationManager.NavigateTo("students");
+        }
+    }
+    
+    private void Edit(long studentId)
+    {
+        UrlNavigationManager.NavigateTo($"/students/edit/{studentId}");
+    }
+
+    private async Task Delete(long studentId)
+    {
+        if (await Js.InvokeAsync<bool>("confirm", $"Вы действительно хотите удалить запись - {StudentService.GetFullFIO(Student)}?"))
+        {
+            await StudentService.DeleteOneAsync(studentId);
+            await OnInitializedAsync();
+        }
+    }
+}

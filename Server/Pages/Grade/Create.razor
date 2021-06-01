@@ -1,0 +1,48 @@
+﻿@page "/grades/create"
+@using BusinessLogicLayer.GradeService.Dtos
+@using BusinessLogicLayer.GradeService
+@inject NavigationManager UrlNavigationManager
+@inject IGradeService GradeService
+
+@inherits CreateGradeBase;
+
+<h3>Добавление класса</h3>
+
+<EditForm Model="@_grade" OnValidSubmit="CreateGrade">
+    <DataAnnotationsValidator />
+     <div class="form-group row">
+        <label class="control-label col-md-12">Номер</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_grade.Number" />
+        </div>
+        <ValidationMessage For="@(() => _grade.Number)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Параллель</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_grade.Parallel" />
+        </div>
+        <ValidationMessage For="@(() => _grade.Parallel)" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-light" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
+
+@code {
+    GradeDto _grade = new();
+
+    protected async Task CreateGrade()
+    {
+        
+        await GradeService.AddOneAsync(_grade);
+        UrlNavigationManager.NavigateTo("/grades");
+    }
+    
+
+    void Cancel()
+    {
+        UrlNavigationManager.NavigateTo("/grades");
+    }
+}

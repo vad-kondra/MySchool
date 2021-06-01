@@ -1,0 +1,38 @@
+﻿@page "/subjects/create"
+
+@using DataAccessLayer.Models.Enums
+@using BusinessLogicLayer
+@inherits CreateSubjectBase
+
+<h3>Добавление ученика</h3>
+
+<EditForm Model="@Subject" OnValidSubmit="CreateTeacher">
+    <DataAnnotationsValidator />
+     <div class="form-group row">
+        <label class="control-label col-md-12">Фамилия</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="Subject.Title" />
+        </div>
+        <ValidationMessage For="@(() => Subject.Title)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Имя</label>
+        <div class="col-md-4">
+            <InputSelect class="form-control" id="subject-type" @bind-Value="Subject.Type">
+                @foreach (Enum item in Enum.GetValues(typeof(SubjectType)))
+                {
+                    <option value="@item">@SubjectService.GetTypeName((SubjectType)item, Language.Russian)</option>
+                }
+            </InputSelect>
+        </div>
+        <ValidationMessage For="@(() => Subject.Type)" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-light" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
+
+@code {
+
+}

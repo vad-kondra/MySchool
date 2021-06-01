@@ -1,0 +1,99 @@
+﻿@page "/students"
+@using BusinessLogicLayer.StudentService.Dtos
+@using BusinessLogicLayer.StudentService
+@using BusinessLogicLayer.GradeService
+
+@inject NavigationManager UrlNavigationManager
+@inject IStudentService StudentService
+@inject IGradeService GradeService
+@inject IJSRuntime Js
+
+<h1>Список учеников</h1>
+
+<div class="form-group">
+    <a class="btn btn-success" @onclick="Create"><i class="oi oi-plus"></i> Добавить</a>
+</div>
+<br>
+
+@if (_students == null)
+{
+    <p>
+        <em>Загрузка...</em>
+    </p>
+}
+else if (!_students.Any())
+{
+    <text>Список пуст.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ФИО</th>
+            <th>Класс</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var student in _students)
+        {
+            <tr>
+                <td>@GetName(student)</td>
+                <td>@GetGradeTitle(student)</td>
+                <td>
+                    <button type="button" class="btn btn-info" @onclick="@(() => Show(student.StudentId))">Открыть</button>
+                    <button type="button" class="btn btn-success" @onclick="@(() => Edit(student.StudentId))">Редактировать</button>
+                    <button type="button" class="btn btn-danger" @onclick="@(() => Delete(student.StudentId))">Удалить</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    IEnumerable<StudentDto> _students { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _students = await StudentService.GetAllAsync();
+    }
+    
+    protected string GetName(StudentDto studentDto)
+    {
+        return StudentService.GetFullFIO(studentDto);
+    }
+    
+    private void Show(long studentId)
+    {
+        UrlNavigationManager.NavigateTo($"/students/{studentId}");
+    }
+    
+    private void Create()
+    {
+        UrlNavigationManager.NavigateTo("/students/create");
+    }
+    
+    private void Edit(long studentId)
+    {
+        UrlNavigationManager.NavigateTo($"/students/edit/{studentId}");
+    }
+
+    private async Task Delete(long studentId)
+    {
+        var student = _students.First(x => x.StudentId == studentId);
+        if (await Js.InvokeAsync<bool>("confirm", $"Вы действительно хотите удалить запись - {student.LastName} {student.FirstName}?"))
+        {
+            await StudentService.DeleteOneAsync(studentId);
+            await OnInitializedAsync();
+        }
+    }
+
+    private string GetGradeTitle(StudentDto student)
+    {
+        return GradeService.GetGradeTitle(student.Grade);
+    }
+
+}

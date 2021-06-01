@@ -1,0 +1,88 @@
+﻿@page "/subjects"
+
+@using BusinessLogicLayer.SubjectService
+@using BusinessLogicLayer.SubjectService.Dtos
+@using BusinessLogicLayer
+
+@inject NavigationManager UrlNavigationManager
+@inject ISubjectService SubjectService
+@inject IJSRuntime Js
+
+<h1>Список предметов</h1>
+
+<div class="form-group">
+    <a class="btn btn-success" @onclick="Create"><i class="oi oi-plus"></i> Добавить</a>
+</div>
+<br>
+
+@if (Subjects == null)
+{
+    <p>
+        <em>Загрузка...</em>
+    </p>
+}
+else if (!Subjects.Any())
+{
+    <text>Список пуст.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Тип</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var subjectDto in Subjects)
+        {
+            <tr>
+                <td>@subjectDto.Title</td>
+                <td>@SubjectService.GetTypeName(subjectDto.Type, Language.Russian)</td>
+                <td>
+                    <button type="button" class="btn btn-info" @onclick="@(() => Show(subjectDto.SubjectId))">Открыть</button>
+                    <button type="button" class="btn btn-success" @onclick="@(() => Edit(subjectDto.SubjectId))">Редактировать</button>
+                    <button type="button" class="btn btn-danger" @onclick="@(() => Delete(subjectDto.SubjectId))">Удалить</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    IEnumerable<SubjectDto> Subjects { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Subjects = await SubjectService.GetAllAsync();
+    }
+    
+    private void Show(long id)
+    {
+        UrlNavigationManager.NavigateTo($"/subjects/{id}");
+    }
+    
+    private void Create()
+    {
+        UrlNavigationManager.NavigateTo("/subjects/create");
+    }
+    
+    private void Edit(long id)
+    {
+        UrlNavigationManager.NavigateTo($"/subjects/edit/{id}");
+    }
+
+    private async Task Delete(long id)
+    {
+        var subject = Subjects.First(x => x.SubjectId == id);
+        if (await Js.InvokeAsync<bool>("confirm", $"Вы действительно хотите удалить запись - {subject.Title} ?"))
+        {
+            await SubjectService.DeleteOneAsync(id);
+            await OnInitializedAsync();
+        }
+    }
+}

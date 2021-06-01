@@ -1,0 +1,55 @@
+﻿@page "/teachers/create"
+@using BusinessLogicLayer.TeacherService.Dtos
+@using BusinessLogicLayer.TeacherService
+@inject NavigationManager UrlNavigationManager
+@inject ITeacherService TeacherService
+
+<h3>Добавление</h3>
+
+<EditForm Model="@_teacher" OnValidSubmit="CreateTeacher">
+    <DataAnnotationsValidator />
+     <div class="form-group row">
+        <label class="control-label col-md-12">Фамилия</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_teacher.LastName" />
+        </div>
+        <ValidationMessage For="@(() => _teacher.LastName)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Имя</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_teacher.FirstName" />
+        </div>
+        <ValidationMessage For="@(() => _teacher.FirstName)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Отчество</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_teacher.MiddleName" />
+        </div>
+        <ValidationMessage For="@(() => _teacher.MiddleName)" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-light" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
+
+@code {
+    
+    private bool IsCancelAction { get; set; }
+
+    readonly TeacherDto _teacher = new();
+
+    protected async Task CreateTeacher()
+    {
+        await TeacherService.AddOneAsync(_teacher);
+        UrlNavigationManager.NavigateTo("/teachers");
+    }
+
+    void Cancel()
+    {
+        //IsCancelAction = true;
+        UrlNavigationManager.NavigateTo("teachers");
+    }
+}

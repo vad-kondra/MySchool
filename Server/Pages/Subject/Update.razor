@@ -1,0 +1,55 @@
+﻿@page "/subjects/edit/{subjectId:long}"
+
+@using DataAccessLayer.Models.Enums
+@using BusinessLogicLayer
+@inherits UpdateSubjectBase
+
+<h3>Редактирование</h3>
+
+<EditForm Model="Subject" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+     <div class="form-group row">
+        <label class="control-label col-md-12">Название</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="Subject.Title" />
+        </div>
+        <ValidationMessage For="@(() => Subject.Title)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Тип</label>
+        <div class="col-md-4">
+            <InputSelect class="form-control" id="subject-type" @bind-Value="Subject.Type">
+                @foreach (Enum item in Enum.GetValues(typeof(SubjectType)))
+                {
+                    <option value="@item">@SubjectService.GetTypeName((SubjectType)item, Language.Russian)</option>
+                }
+            </InputSelect>
+        </div>
+        <ValidationMessage For="@(() => Subject.Type)" />
+    </div>
+   
+    @*<div class="form-group row">
+        <label class="control-label col-md-12">Класс</label>
+        <div class="col-md-4">
+            <InputSelect id="grade" @bind-Value="Subject.S" class="form-control">
+                <option value="">Не выбран</option>
+                @foreach (var grade in Grades)
+                {
+                    <option value="@grade.GradeId">@grade.Number-@grade.Parallel</option>
+                }
+            </InputSelect>
+        </div>
+        <ValidationMessage For="@(() => Student.MiddleName)" />
+    </div>*@
+    
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-light" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
+
+@code {
+
+}

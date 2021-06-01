@@ -1,0 +1,69 @@
+﻿@page "/classes"
+@using Data.Models
+@inject SchoolHttpClient HttpClient
+@inject IJSRuntime Js
+
+<h1>Список классов</h1>
+
+<div class="form-group">
+    <a class="btn btn-success" href="classes/create"><i class="oi oi-plus"></i> Добавить</a>
+</div>
+<br>
+
+@if (_classes == null)
+{
+    <p>
+        <em>Загрузка...</em>
+    </p>
+}
+else if (_classes.Length == 0)
+{
+    <text>Список пуст.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Номер</th>
+            <th>Параллель</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var schoolClass in _classes)
+        {
+            <tr>
+                <td>@schoolClass.Number</td>
+                <td>@schoolClass.Parallel</td>
+                <td>
+                    <a class="btn btn-success" href="classes/edit/@schoolClass.Id">Редактировать</a>
+                    <button class="btn btn-danger" @onclick="@(() => Delete(schoolClass.Id))">Удалить</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    Clazz[] _classes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var getAllUri = new Uri($"{HttpClient.SchoolClassesServiceHost}api/v1/classes");
+        _classes = await HttpClient.GetFromJsonAsync<Clazz[]>(getAllUri);
+    }
+
+    async Task Delete(int classId)
+    {
+        var schoolClass = _classes.First(x => x.Id == classId);
+        if (await Js.InvokeAsync<bool>("confirm", $"Вы действительно хотите удалить запись {schoolClass.Number} - {schoolClass.Parallel}?"))
+        {
+            var deleteUri = new Uri($"{HttpClient.SchoolClassesServiceHost}api/v1/classes/{classId}");
+            await HttpClient.DeleteAsync(deleteUri);
+            await OnInitializedAsync();
+        }
+    }
+}

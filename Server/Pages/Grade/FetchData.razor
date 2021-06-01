@@ -1,0 +1,69 @@
+﻿@page "/grades"
+@using BusinessLogicLayer.GradeService.Dtos
+@using BusinessLogicLayer.GradeService
+@inject IGradeService GradeService
+@inject IJSRuntime Js
+
+<h1>Список классов</h1>
+
+<div class="form-group">
+    <a class="btn btn-success" href="grades/create"><i class="oi oi-plus"></i> Добавить</a>
+</div>
+<br>
+
+@if (_grages == null)
+{
+    <p>
+        <em>Загрузка...</em>
+    </p>
+}
+else if (_grages.Length == 0)
+{
+    <text>Список пуст.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Номер</th>
+            <th>Параллель</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var grade in _grages)
+        {
+            <tr>
+                <td>@grade.Number</td>
+                <td>@grade.Parallel</td>
+                <td>
+                    <a class="btn btn-success" href="grades/edit/@grade.GradeId">Редактировать</a>
+                    <button class="btn btn-danger" @onclick="@(() => Delete(grade.GradeId))">Удалить</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    GradeDto[] _grages { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var all = await GradeService.GetAllAsync();
+        _grages = all.ToArray();
+    }
+
+    async Task Delete(long gradeId)
+    {
+        var grade = _grages.First(x => x.GradeId == gradeId);
+        if (await Js.InvokeAsync<bool>("confirm", $"Вы действительно хотите удалить запись {grade.Number} - {grade.Parallel}?"))
+        {
+            await GradeService.DeleteOneAsync(gradeId);
+            await OnInitializedAsync();
+        }
+    }
+}

@@ -1,0 +1,53 @@
+﻿@page "/classes/edit/{schoolClassId:int}"
+@using Data.Models
+@inject SchoolHttpClient HttpClient
+@inject NavigationManager UrlNavigationManager
+
+<h3>Редактирование</h3>
+
+<EditForm Model="@_clazz" OnValidSubmit="UpdateSchoolClass">
+    <DataAnnotationsValidator />
+    <div class="form-group row">
+        <label class="control-label col-md-12">Номер</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_clazz.Number" />
+        </div>
+        <ValidationMessage For="@(() => _clazz.Number)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Параллель</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_clazz.Parallel" />
+        </div>
+        <ValidationMessage For="@(() => _clazz.Parallel)" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-light" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int schoolClassId { get; set; }
+
+    Clazz _clazz = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var getOneUri = new Uri($"{HttpClient.SchoolClassesServiceHost}api/v1/classes/{schoolClassId}");
+        _clazz = await HttpClient.GetFromJsonAsync<Clazz>(getOneUri);
+    }
+
+    protected async Task UpdateSchoolClass()
+    {
+        var putOneUri = new Uri($"{HttpClient.SchoolClassesServiceHost}api/v1/classes");
+        await HttpClient.PutAsJsonAsync(putOneUri, _clazz);
+        UrlNavigationManager.NavigateTo("/classes");
+    }
+
+    void Cancel()
+    {
+        UrlNavigationManager.NavigateTo("/classes");
+    }
+}

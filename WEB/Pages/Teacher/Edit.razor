@@ -1,0 +1,61 @@
+﻿@page "/teachers/edit/{teacherId:int}"
+@using Data.Models
+@inject SchoolHttpClient HttpClient
+@inject NavigationManager UrlNavigationManager
+
+<h3>Редактирование</h3>
+
+<EditForm Model="@_teacher" OnValidSubmit="UpdateTeacher">
+    <DataAnnotationsValidator />
+    
+     <div class="form-group row">
+        <label class="control-label col-md-12">Фамилия</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_teacher.LastName" />
+        </div>
+        <ValidationMessage For="@(() => _teacher.LastName)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Имя</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_teacher.FirstName" />
+        </div>
+        <ValidationMessage For="@(() => _teacher.FirstName)" />
+    </div>
+    <div class="form-group row">
+        <label class="control-label col-md-12">Отчество</label>
+        <div class="col-md-4">
+            <input class="form-control" @bind="_teacher.MiddleName" />
+        </div>
+        <ValidationMessage For="@(() => _teacher.MiddleName)" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-light" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int teacherId { get; set; }
+
+    Teacher _teacher = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var getOneUri = new Uri($"{HttpClient.TeachersServiceHost}api/v1/teachers/{teacherId}");
+        _teacher = await HttpClient.GetFromJsonAsync<Teacher>(getOneUri);
+    }
+
+    protected async Task UpdateTeacher()
+    {
+        var putOneUri = new Uri($"{HttpClient.TeachersServiceHost}api/v1/teachers");
+        await HttpClient.PutAsJsonAsync(putOneUri, _teacher);
+        UrlNavigationManager.NavigateTo("/teachers");
+    }
+
+    void Cancel()
+    {
+        UrlNavigationManager.NavigateTo("/teachers");
+    }
+}

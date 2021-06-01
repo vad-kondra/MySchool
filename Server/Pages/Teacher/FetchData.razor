@@ -1,0 +1,72 @@
+﻿@page "/teachers"
+@using BusinessLogicLayer.TeacherService
+@using BusinessLogicLayer.TeacherService.Dtos
+
+@inject ITeacherService TeacherService
+@inject NavigationManager UrlNavigationManager
+@inject IJSRuntime Js
+
+<h1>Список учителей</h1>
+
+<div class="form-group">
+    <a class="btn btn-success" href="teachers/create"><i class="oi oi-plus"></i> Добавить</a>
+</div>
+<br>
+
+@if (_teachers == null)
+{
+    <p>
+        <em>Загрузка...</em>
+    </p>
+}
+else if (_teachers.Count == 0)
+{
+    <text>Список пуст.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Фамилия</th>
+            <th>Имя</th>
+            <th>Отчество</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var teacher in _teachers)
+        {
+            <tr>
+                <td>@teacher.LastName</td>
+                <td>@teacher.FirstName</td>
+                <td>@teacher.MiddleName</td>
+                <td>
+                    <a class="btn btn-success" href="teachers/edit/@teacher.TeacherId">Редактировать</a>
+                    <button class="btn btn-danger" @onclick="@(() => Delete(teacher.TeacherId))">Удалить</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    List<TeacherDto> _teachers { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _teachers = await TeacherService.GetAllAsync();
+    }
+
+    async Task Delete(long teacherId)
+    {
+        var teacher = _teachers.First(x => x.TeacherId == teacherId);
+        if (await Js.InvokeAsync<bool>("confirm", $"Вы действительно хотите удалить запись {teacher.FirstName}, {teacher.TeacherId}?"))
+        {
+            await TeacherService.DeleteOneAsync(teacherId);
+            await OnInitializedAsync();
+        }
+    }
+}
